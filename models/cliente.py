@@ -1,10 +1,11 @@
-from app import mysql
+from database import get_connection
 
 class Cliente:
 
     @staticmethod
     def obtener_todos(nombre=None, documento=None, telefono=None):
-        cur = mysql.connection.cursor()
+        conexion = get_connection()
+        cursor = conexion.cursor()
         query = "SELECT * FROM clientes WHERE 1=1"
         params = []
         if nombre:
@@ -17,44 +18,53 @@ class Cliente:
             query += " AND telefono LIKE %s"
             params.append(f"%{telefono}%")
         query += " ORDER BY nombre ASC"
-        cur.execute(query, params)
-        clientes = cur.fetchall()
-        cur.close()
+        cursor.execute(query, params)
+        clientes = cursor.fetchall()
+        cursor.close()
+        conexion.close()
         return clientes
 
     @staticmethod
     def obtener_por_id(id):
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM clientes WHERE id = %s", (id,))
-        cliente = cur.fetchone()
-        cur.close()
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM clientes WHERE id = %s", (id,))
+        cliente = cursor.fetchone()
+        cursor.close()
+        conexion.close()
         return cliente
 
     @staticmethod
     def crear(datos):
-        cur = mysql.connection.cursor()
-        cur.execute("""
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
             INSERT INTO clientes (nombre, documento, telefono, email, direccion)
             VALUES (%s, %s, %s, %s, %s)
         """, (datos['nombre'], datos['documento'], datos['telefono'],
               datos['email'], datos['direccion']))
-        mysql.connection.commit()
-        cur.close()
+        conexion.commit()
+        cursor.close()
+        conexion.close()
 
     @staticmethod
     def actualizar(id, datos):
-        cur = mysql.connection.cursor()
-        cur.execute("""
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
             UPDATE clientes SET nombre=%s, documento=%s, telefono=%s,
             email=%s, direccion=%s WHERE id=%s
         """, (datos['nombre'], datos['documento'], datos['telefono'],
               datos['email'], datos['direccion'], id))
-        mysql.connection.commit()
-        cur.close()
+        conexion.commit()
+        cursor.close()
+        conexion.close()
 
     @staticmethod
     def eliminar(id):
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE FROM clientes WHERE id = %s", (id,))
-        mysql.connection.commit()
-        cur.close()
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM clientes WHERE id = %s", (id,))
+        conexion.commit()
+        cursor.close()
+        conexion.close()

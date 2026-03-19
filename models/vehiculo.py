@@ -1,10 +1,11 @@
-from app import mysql
+from database import get_connection
 
 class Vehiculo:
 
     @staticmethod
     def obtener_todos(marca=None, modelo=None, precio_max=None, estado=None):
-        cur = mysql.connection.cursor()
+        conexion = get_connection()
+        cursor = conexion.cursor()
         query = "SELECT * FROM vehiculos WHERE 1=1"
         params = []
         if marca:
@@ -20,54 +21,65 @@ class Vehiculo:
             query += " AND estado = %s"
             params.append(estado)
         query += " ORDER BY creado_en DESC"
-        cur.execute(query, params)
-        vehiculos = cur.fetchall()
-        cur.close()
+        cursor.execute(query, params)
+        vehiculos = cursor.fetchall()
+        cursor.close()
+        conexion.close()
         return vehiculos
 
     @staticmethod
     def obtener_por_id(id):
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM vehiculos WHERE id = %s", (id,))
-        vehiculo = cur.fetchone()
-        cur.close()
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM vehiculos WHERE id = %s", (id,))
+        vehiculo = cursor.fetchone()
+        cursor.close()
+        conexion.close()
         return vehiculo
 
     @staticmethod
     def crear(datos):
-        cur = mysql.connection.cursor()
-        cur.execute("""
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
             INSERT INTO vehiculos (marca, modelo, precio, cilindraje, color, anio, estado)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (datos['marca'], datos['modelo'], datos['precio'],
               datos['cilindraje'], datos['color'], datos['anio'], datos['estado']))
-        mysql.connection.commit()
-        cur.close()
-
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+    
     @staticmethod
     def actualizar(id, datos):
-        cur = mysql.connection.cursor()
-        cur.execute("""
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
             UPDATE vehiculos SET marca=%s, modelo=%s, precio=%s,
             cilindraje=%s, color=%s, anio=%s, estado=%s
             WHERE id=%s
         """, (datos['marca'], datos['modelo'], datos['precio'],
               datos['cilindraje'], datos['color'], datos['anio'],
               datos['estado'], id))
-        mysql.connection.commit()
-        cur.close()
+        conexion.commit()
+        cursor.close()
+        conexion.close()
 
     @staticmethod
     def eliminar(id):
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE FROM vehiculos WHERE id = %s", (id,))
-        mysql.connection.commit()
-        cur.close()
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM vehiculos WHERE id = %s", (id,))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
 
     @staticmethod
     def obtener_disponibles():
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM vehiculos WHERE estado = 'disponible' ORDER BY marca")
-        vehiculos = cur.fetchall()
-        cur.close()
+        conexion = get_connection()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM vehiculos WHERE estado = 'disponible' ORDER BY marca")
+        vehiculos = cursor.fetchall()
+        cursor.close()
+        conexion.close()
         return vehiculos
